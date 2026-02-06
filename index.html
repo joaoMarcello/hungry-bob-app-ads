@@ -271,12 +271,14 @@
           let timeFormatted = '-';
           if (entry.metadata) {
             try {
-              const metadata = JSON.parse(entry.metadata);
+              // Replace single quotes with double quotes for valid JSON
+              const fixedMetadata = entry.metadata.replace(/'/g, '"');
+              const metadata = JSON.parse(fixedMetadata);
               if (metadata.seconds) {
                 timeFormatted = formatTime(metadata.seconds);
               }
             } catch (e) {
-              console.error('Error parsing metadata:', e);
+              console.error('Error parsing metadata:', e, entry.metadata);
             }
           }
           
