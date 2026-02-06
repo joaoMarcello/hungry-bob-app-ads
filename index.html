@@ -66,6 +66,44 @@
       font-size: 0.8rem;
       color: #888;
     }
+    table.leaderboard {
+      width: 100%;
+      border-collapse: collapse;
+      background: #222;
+      margin-top: 1rem;
+    }
+    table.leaderboard th {
+      background: #333;
+      color: #00ffe1;
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 2px solid #00ffe1;
+      font-size: 0.9rem;
+    }
+    table.leaderboard td {
+      padding: 0.75rem;
+      border-bottom: 1px solid #333;
+      font-size: 0.8rem;
+    }
+    table.leaderboard tr:hover {
+      background: #2a2a2a;
+    }
+    table.leaderboard .rank {
+      color: #ffdf00;
+      font-weight: bold;
+      width: 50px;
+    }
+    table.leaderboard .name {
+      color: #fff;
+    }
+    table.leaderboard .score {
+      color: #00ff88;
+      text-align: right;
+    }
+    table.leaderboard .time {
+      color: #ff8800;
+      text-align: right;
+    }
     @media (max-width: 600px) {
       header h1 {
         font-size: 1.2rem;
@@ -75,6 +113,11 @@
       }
       ul li {
         font-size: 0.75rem;
+      }
+      table.leaderboard th,
+      table.leaderboard td {
+        font-size: 0.65rem;
+        padding: 0.5rem;
       }
     }
   </style>
@@ -110,10 +153,76 @@
       </ul>
       <img class="placeholder" src="https://placehold.co/600x400?text=Screenshot+2" alt="Screenshot 2" />
     </section>
+
+    <section class="section">
+      <h2>Global Leaderboard</h2>
+      <div id="leaderboard-container">
+        <p style="text-align: center;">Loading leaderboard...</p>
+      </div>
+    </section>
   </main>
 
   <footer>
     © 2025 Hungry Bob. All rights reserved.
   </footer>
+
+  <script>
+    // Fetch and display leaderboard
+    async function loadLeaderboard() {
+      const container = document.getElementById('leaderboard-container');
+      
+      try {
+        const response = await fetch('http://dreamlo.com/lb/65ba4ca58f40bbbdf0f4d149/quote');
+        const csvText = await response.text();
+        
+        // Parse CSV
+        const lines = csvText.trim().split('\n');
+        const entries = lines.map(line => {
+          const match = line.match(/"([^"]*)","([^"]*)","([^"]*)","([^"]*)","([^"]*)"/);
+          if (match) {
+            return {
+              name: match[1],
+              score: parseInt(match[2]),
+              time: parseInt(match[3]),
+              info: match[4],
+              date: match[5]
+            };
+          }
+          return null;
+        }).filter(entry => entry !== null);
+        
+        // Format time as MM:SS
+        function formatTime(seconds) {
+          const mins = Math.floor(seconds / 60);
+          const secs = seconds % 60;
+          return mins + ':' + (secs < 10 ? '0' : '') + secs;
+        }
+        
+        // Build table
+        let html = '<table class="leaderboard">';
+        html += '<thead><tr><th class="rank">#</th><th class="name">Player</th><th class="score">Score</th><th class="time">Time</th></tr></thead>';
+        html += '<tbody>';
+        
+        entries.forEach((entry, index) => {
+          html += '<tr>';
+          html += '<td class="rank">' + (index + 1) + '</td>';
+          html += '<td class="name">' + entry.name + '</td>';
+          html += '<td class="score">' + entry.score.toLocaleString() + '</td>';
+          html += '<td class="time">' + formatTime(entry.time) + '</td>';
+          html += '</tr>';
+        });
+        
+        html += '</tbody></table>';
+        container.innerHTML = html;
+        
+      } catch (error) {
+        container.innerHTML = '<p style="text-align: center; color: #ff4444;">Failed to load leaderboard. Please try again later.</p>';
+        console.error('Error loading leaderboard:', error);
+      }
+    }
+    
+    // Load on page load
+    loadLeaderboard();
+  </script>
 </body>
 </html>
