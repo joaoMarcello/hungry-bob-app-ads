@@ -284,7 +284,7 @@
           
           html += '<tr>';
           html += '<td class="rank">' + entry.rank + '</td>';
-          html += '<td class="name">' + (entry.player?.name || 'Anonymous') + '</td>';
+          html += '<td class="name">' + (entry.member_id || entry.player?.name || 'Anonymous') + '</td>';
           html += '<td class="score">' + entry.score.toLocaleString() + '</td>';
           html += '<td class="time">' + timeFormatted + '</td>';
           html += '</tr>';
